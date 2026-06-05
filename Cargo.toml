@@ -1,0 +1,32 @@
+[package]
+name = "only-cc-lite"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "Apache-2.0"
+description = "Lightweight context compression extracted from Headroom — zero ML deps, proxy-friendly API."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision", "raw_value"] }
+bytes = "1"
+thiserror = "1"
+tracing = "0.1"
+regex = "1"
+aho-corasick = "1"
+unidiff = "0.4"
+md-5 = "0.10"
+sha2 = "0.10"
+blake3 = "1"
+flate2 = "1"
+rayon = "1"
+toml = "0.8"
+dashmap = "6"
+rusqlite = { version = "0.32", features = ["bundled"] }
+http = "1"
+
+[dev-dependencies]
+proptest = "1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("redis"))'] }
