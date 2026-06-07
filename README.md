@@ -331,6 +331,56 @@ pub trait Tokenizer {
 
 ---
 
+## 5. 真实会话评估 (Eval Bench)
+
+基于真实 AI 编程助手会话日志评估压缩收益。自动发现本地会话文件，解析后通过压缩器运行，生成汇总报告。
+
+### 支持的 Agent CLI
+
+| Agent CLI | 会话目录 | 日志格式 |
+|-----------|---------|---------|
+| **Claude Code** | `~/.claude/projects/*/*.jsonl` | Anthropic Messages API |
+| **Qwen Code** | `~/.qwen/projects/*/chats/*.jsonl` | OpenAI Chat Completions |
+
+会话文件通过环境变量 `USERPROFILE`（Windows）或 `HOME`（Unix）自动定位用户主目录，无硬编码路径。
+
+### 运行
+
+```bash
+cargo bench --bench eval_runner
+```
+
+### 查看报告
+
+运行后自动生成两份报告到项目 `target/` 目录：
+
+```bash
+# 文本报告（人类可读）
+cat target/eval-report.txt
+
+# JSON 报告（程序消费）
+cat target/eval-report.json
+```
+
+报告内容包括：
+- 总体会话数、轮次数、input tokens
+- 可压缩的 user 内容大小 vs 不压缩的 assistant 内容大小
+- tokens 节省、bytes 节省、user 压缩率
+- 按来源（Claude Code / Qwen Code）分组统计
+- 每个会话的逐轮压缩明细（命中策略、压缩率）
+
+### 前缀缓存稳定性
+
+压缩器通过三层机制保证 LLM API 的前缀缓存（prompt cache）不被破坏：
+
+1. **Frozen Zone 保护** — 历史 assistant 消息完全不动，只对最新 user 消息做压缩
+2. **Live Zone 限制** — 只压缩最后一条 user 消息中的可压缩内容块（工具结果、文件内容等）
+3. **Byte-range Surgery** — `apply_replacements()` 做字节级精确替换，保证前缀 SHA-256 一致
+
+这意味着同一个会话的多次压缩请求，frozen 部分的字节序列完全不变，LLM 提供商的前缀缓存命中率不受影响。
+
+---
+
 ## 与 Headroom 的差异
 
 | 特性 | headroom-core | only-cc-lite |

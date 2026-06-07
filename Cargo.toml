@@ -28,5 +28,9 @@ http = "1"
 [dev-dependencies]
 proptest = "1"
 
+[[bench]]
+name = "eval_runner"
+harness = false
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("redis"))'] }
